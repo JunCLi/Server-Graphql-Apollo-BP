@@ -16,11 +16,17 @@ switch (process.env.NODE_ENV) {
     database = 'postgres'
     break;
   case 'production':
+		host = 'localhost'
+		user = 'postgres'
+		password = 'root'
+		database = 'postgres'
   default:
+		host = 'localhost'
+		user = 'postgres'
+		password = 'root'
+		database = 'postgres'
     break;
 }
-
-
 
 const postgres = new Pool({
   host: host,
