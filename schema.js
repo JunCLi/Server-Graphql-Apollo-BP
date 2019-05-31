@@ -1,13 +1,20 @@
 const { gql } = require('apollo-server-express')
 
 module.exports = gql`
-
-  type User {
-    id: ID,
-    fullname: String
-  }
   type Query {
-    getUser(id : ID): User,
+    placeholder: QueryPlaceholder
   }
+
+	type QueryPlaceholder {
+		id: ID
+	}
+
+	type Mutation {
+		placeholder: MutationPlaceholder
+	}
+
+	type MutationPlaceholder {
+		id: ID
+	}
 `
 

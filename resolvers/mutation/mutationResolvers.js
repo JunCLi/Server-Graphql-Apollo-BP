@@ -7,8 +7,14 @@ const authenticate = require('../authenticate')
 
 module.exports = {
   Mutation: {
-    // async signup( parent, { input: { email, password }, }, { req, app, postgres }) {
-    // }
+		async placeholder(parent, {input}, {req, app, postgres}){
+			try {
+
+				return null
+			} catch(err) {
+				
+			}
+		},
   },
 }
 
