@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 const saltRounds = 12
 const crypto = require('crypto')
 const Promise = require('bluebird')
-const authenticate = require('../resolvers/authenticate')
+const authenticate = require('../utils/DSHelperFunctions/authenticate')
 
 class Database extends DataSource {
 	constructor() {
