@@ -1,19 +1,11 @@
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
-const saltRounds = 12
-const crypto = require('crypto')
-const Promise = require('bluebird')
-const authenticate = require('../authenticate')
-
 module.exports = {
   Mutation: {
-		async placeholder(parent, {input}, {req, app, postgres}){
-			try {
+		async placeholder(parent, { input }, { dataSources, req, app, postgres }){
+			return await dataSources.database.mutationPlaceholder('placeholder')
+		},
 
-				return null
-			} catch(err) {
-				
-			}
+		async placeholderApi(parent, { input }, { dataSources, req, app, postgres }){
+			return await dataSources.placeholderApi.mutationPlaceholder('placeholder')
 		},
   },
 }

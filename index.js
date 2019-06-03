@@ -6,6 +6,9 @@ const path = require('path')
 const { ApolloServer } = require('apollo-server-express')
 const { makeExecutableSchema } = require('graphql-tools')
 
+const Database = require('./datasources/database')
+const PlaceholderApi = require('./datasources/placeholderApi')
+
 const postgres = require('./config/postgres')
 const typeDefs = require('./schema')
 let resolvers = require('./resolvers')
@@ -38,6 +41,11 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(cors(corsConfig))
 }
 
+const dataSources = () => ({
+	database: new Database(),
+	placeholderApi: new PlaceholderApi(),
+})
+
 resolvers = resolvers()
 
 const schema = makeExecutableSchema({
@@ -61,7 +69,8 @@ const apolloServer = new ApolloServer({
       postgres,
     }
   },
-  schema,
+	schema,
+	dataSources
 })
 
 apolloServer.applyMiddleware({

@@ -1,14 +1,11 @@
-const authenticate = require('../authenticate')
-
 module.exports = {
   Query: {
-		async placeholder(parent, {input}, {req, app, postgres}){
-			try {
+		async placeholder(parent, { input }, { dataSources, req, app, postgres }){
+			return await dataSources.database.queryPlaceholder('placeholder')
+		},
 
-				return null
-			} catch(err) {
-
-			}
+		async placeholderApi(parent, { input }, { dataSources, req, app, postgres }){
+			return await dataSources.placeholderApi.queryPlaceholder('placeholder')
 		},
   },
 }
