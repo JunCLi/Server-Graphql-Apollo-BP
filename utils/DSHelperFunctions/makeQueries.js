@@ -13,9 +13,16 @@ module.exports.createSelectQuery = (selectColumns, table, selector, selectorValu
 }
 
 module.exports.createInsertQuery = (inputObject, table, returnValues) => {
-  const queryKeys = Object.keys(inputObject)
+	const camelToSnake = string => (
+    string.replace(/([A-Z])/g, letter => (
+        '_' + letter.toLowerCase()
+    ))
+	)
+
+	const queryKeys = Object.keys(inputObject)
   const queryValues = Object.values(inputObject)
-  const queryString = queryKeys.join(', ')
+	const convertedQueryKeys = queryKeys.map(key => camelToSnake(key))
+  const queryString = convertedQueryKeys.join(', ')
   const queryValuesString = queryKeys.map(
     (key, index) => `$${index + 1}`
   ).join(', ')

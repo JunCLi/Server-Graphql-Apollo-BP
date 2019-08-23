@@ -1,25 +1,30 @@
-const express = require('express')
-const cookieParser = require('cookie-parser')
+// from packages
 const chalk = require('chalk')
+const cookieParser = require('cookie-parser')
 const cors = require('cors')
+const express = require('express')
+const http = require('http')
 const path = require('path')
 const { ApolloServer } = require('apollo-server-express')
 const { makeExecutableSchema } = require('graphql-tools')
 
-const Database = require('./datasources/database')
-const PlaceholderApi = require('./datasources/placeholderApi')
-
+// from files
 const postgres = require('./config/postgres')
 const typeDefs = require('./schema')
-let resolvers = require('./resolvers')
+const makeResolvers = require('./resolvers')
 
+// import datasources
+const Database = require('./datasources/placeholderDatabase')
+const PlaceholderApi = require('./datasources/placeholderApi')
+
+// configure
 const app = express()
 const PORT = process.env.PORT || 8080
 app.set('PORT', process.env.PORT || 8080)
 app.set('JWT_SECRET', process.env.JWT_SECRET || 'DEV_SECRET')
-
 app.set('JWT_COOKIE_NAME', 'token')
 app.use(cookieParser())
+resolvers = makeResolvers()
 
 if (process.env.NODE_ENV === 'production') {
   const root = path.resolve(__dirname, '../public')
@@ -41,12 +46,11 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(cors(corsConfig))
 }
 
+// configure datasources
 const dataSources = () => ({
 	database: new Database(),
 	placeholderApi: new PlaceholderApi(),
 })
-
-resolvers = resolvers()
 
 const schema = makeExecutableSchema({
   typeDefs,
@@ -78,12 +82,16 @@ apolloServer.applyMiddleware({
   cors: app.get('CORS_CONFIG'),
 })
 
+let server = http.createServer(app)
+
+apolloServer.installSubscriptionHandlers(server)
+
 postgres.on('error', (err, client) => {
   console.error('Unexpected error on idle postgres client', err)
   process.exit(-1)
 })
 
-const server = app.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`>> ${chalk.blue('Express running:')} http://localhost:${PORT}`)
 
   console.log(`>> ${chalk.magenta('GraphQL playground:')} http://localhost:${PORT}/graphql`)

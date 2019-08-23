@@ -1,24 +1,8 @@
 const { Pool } = require('pg')
 const squel = require('squel').useFlavour('postgres')
-const config = require('../config/default.json')
+const config = require('../config/development.json')
 
-const userSeeds = [
-  {
-    fullname: 'Simon Stern',
-    email: 'simon@simon.stern',
-    password: '123',
-  },
-  {
-    fullname: 'Akshay Manchanda',
-    email: 'akshay@akshay.com',
-    password: '123',
-  },
-  {
-    fullname: 'Alam Talash',
-    email: 'alam@alam.com',
-    password: '145',
-  }
-]
+const userSeeds = require('./userSeeds')
 
 const seed = async () => {
   const pg = await new Pool(config.db).connect()
@@ -26,7 +10,7 @@ const seed = async () => {
   try {
     await pg.query('BEGIN')
 
-    console.log('Seeding Users...')
+    console.log('Seeding tables...')
 
     await Promise.all(
       userSeeds.map(userSeed =>
