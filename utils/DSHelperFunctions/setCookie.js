@@ -5,7 +5,7 @@ module.exports.createCookie = (data, expHours) => {
   return jwt.sign({
     data: data,
     exp: exp
-  }, 'secret')
+  }, 'DEV_SUPER_SECRET')
 }
 
 

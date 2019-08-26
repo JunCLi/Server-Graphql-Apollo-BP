@@ -5,7 +5,7 @@ const authenticate = (app, req) => {
   const jwtCookie = req.cookies['boilerplate']
 
   try {
-    const verified_information = jwt.verify(jwtCookie, 'secret')
+    const verified_information = jwt.verify(jwtCookie, 'DEV_SUPER_SECRET')
 
     return verified_information.data
 

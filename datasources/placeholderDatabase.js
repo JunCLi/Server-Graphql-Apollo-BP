@@ -7,7 +7,7 @@ const crypto = require('crypto')
 const Promise = require('bluebird')
 const authenticate = require('../utils/DSHelperFunctions/authenticate')
 
-class Database extends DataSource {
+class PlaceholderDatabase extends DataSource {
 	constructor() {
 		super()
 	}
@@ -33,4 +33,4 @@ class Database extends DataSource {
 	}
 }
 
-module.exports = Database
+module.exports = PlaceholderDatabase

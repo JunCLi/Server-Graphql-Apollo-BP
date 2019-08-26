@@ -10,12 +10,9 @@ const { makeExecutableSchema } = require('graphql-tools')
 
 // from files
 const postgres = require('./config/postgres')
-const typeDefs = require('./schema')
-const makeResolvers = require('./resolvers')
-
-// import datasources
-const Database = require('./datasources/placeholderDatabase')
-const PlaceholderApi = require('./datasources/placeholderApi')
+const typeDefs = require('./graphqlSchema/typeDefs')
+const dataSources = require('./datasources/datasources')
+const makeResolvers = require('./resolvers/resolvers')
 
 // configure
 const app = express()
@@ -45,12 +42,6 @@ if (process.env.NODE_ENV !== 'production') {
   // Allow requests from dev server address
   app.use(cors(corsConfig))
 }
-
-// configure datasources
-const dataSources = () => ({
-	database: new Database(),
-	placeholderApi: new PlaceholderApi(),
-})
 
 const schema = makeExecutableSchema({
   typeDefs,

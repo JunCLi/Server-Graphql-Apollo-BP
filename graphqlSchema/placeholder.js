@@ -1,7 +1,7 @@
 const { gql } = require('apollo-server-express')
 
 module.exports = gql`
-  type Query {
+  extend type Query {
     placeholder: QueryPlaceholder
 		placeholderApi: QueryPlaceholder
   }
@@ -10,7 +10,7 @@ module.exports = gql`
 		id: ID
 	}
 
-	type Mutation {
+	extend type Mutation {
 		placeholder: MutationPlaceholder
 		placeholderApi: MutationPlaceholder
 	}
