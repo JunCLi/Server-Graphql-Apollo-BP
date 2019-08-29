@@ -1,6 +1,6 @@
-const rootSchema = require('./rootSchema')
-const placeholder = require('./placeholder')
+const root = require('./rootSchema')
+const placeholder = require('./placeholderSchema')
 
-const schemaArray = [rootSchema, placeholder]
+const schemaArray = [root, placeholder]
 
 module.exports = schemaArray

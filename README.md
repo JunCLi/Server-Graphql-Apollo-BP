@@ -25,7 +25,6 @@ A server boilerplate for using graphql with postgres and apolloclient
 3. Add Schema modules to context inside 'graphqlSchema/typeDefs.js' by placing inside the array.
 
 ### Cookies
-1. In 'utils/DSHelperFunctions/authenticate.js', change 'boilerplate' cookie name to desired cookie name.
-2. Create and set cookies using the functions in 'utils/DSHelperFunctions/setCookie.js'.
+1. In 'utils/authentication/configureAuth.js', change cookieName and cookieSigniture as appropriate
+2. Create and set cookies using the functions in 'utils/authentication/setCookie.js'.
 3. The second argument the createCookie is the number of hours you want the cookie to last.
-4. Change cookie secret in 'utils/DSHelperFunctions/authenticate.js' and 'utils/DSHelperFunctions/setCookie.js' as required, they must match.

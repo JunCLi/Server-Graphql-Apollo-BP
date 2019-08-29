@@ -1,8 +1,5 @@
 const { DataSource } = require('apollo-datasource')
 
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
-const saltRounds = 12
 const crypto = require('crypto')
 const Promise = require('bluebird')
 const authenticate = require('../utils/DSHelperFunctions/authenticate')
