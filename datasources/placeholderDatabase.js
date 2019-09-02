@@ -2,7 +2,7 @@ const { DataSource } = require('apollo-datasource')
 
 const crypto = require('crypto')
 const Promise = require('bluebird')
-const authenticate = require('../utils/DSHelperFunctions/authenticate')
+const authenticate = require('../utils/authentication/authenticate')
 
 class PlaceholderDatabase extends DataSource {
 	constructor() {
