@@ -1,9 +1,13 @@
-const queryResolvers = require('./query/queryResolvers')
-const mutationResolvers = require('./mutation/mutationResolvers')
+const userResolvers = require('./placeholderResolvers')
 
 module.exports = () => {
   return {
-    ...queryResolvers,
-    ...mutationResolvers,
+    Query: {
+			...userResolvers.Query
+		},
+
+		Mutation: {
+			...userResolvers.Mutation
+		},
   }
 }
