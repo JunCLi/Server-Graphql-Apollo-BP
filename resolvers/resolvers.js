@@ -1,4 +1,4 @@
-const userResolvers = require('./placeholderResolvers')
+const userResolvers = require('./usersResolvers')
 
 module.exports = () => {
   return {
