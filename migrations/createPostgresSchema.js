@@ -5,7 +5,8 @@ exports.up = pgm => {
       "id" SERIAL PRIMARY KEY,
       "email" VARCHAR(255) NOT NULL,
       "password" VARCHAR(255) NOT NULL,
-      "user_date_created" DATE NOT NULL DEFAULT CURRENT_DATE,
+			"user_date_created" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_DATE,
+			"last_modified" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			"first_name" VARCHAR(128),
 			"last_name" VARCHAR(128)
     );
