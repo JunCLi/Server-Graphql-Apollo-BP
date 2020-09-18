@@ -1,10 +1,7 @@
-const camelToSnake = string => (
-	string.replace(/([A-Z])/g, letter => (
-			'_' + letter.toLowerCase()
-	))
-)
+const { camelToSnake, snakeToCamel } = require('../helperFuncitons/caseConv')
 
 module.exports.createSelectQuery = (selectColumns, table, selector, selectorValue) => {
+	selectColumns = selectColumns.map(column => camelToSnake(column))
   const queryString = selectColumns.join(', ')
 
   if (selector) {
@@ -18,25 +15,33 @@ module.exports.createSelectQuery = (selectColumns, table, selector, selectorValu
   }
 }
 
-module.exports.createSelectAndQuery = (selectColumns, table, selectors, selectorValues, conditions) => {
+module.exports.createMultiSelectQuery = (selectColumns, table, selectors, joinType) => {
+	selectColumns = selectColumns.map(column => camelToSnake(column))
 	const queryString = selectColumns.join(', ')
-	const whereConditionArray = selectors.map( (selector, index) => (
-		`${camelToSnake(selector)} ${conditions ? conditions[index] : '=' } '${selectorValues[index]}'`
-		))
-		const whereConditionString = whereConditionArray.join(' AND ')
-		
-		if (selectors.length) {
-			return {
-				text: `SELECT ${queryString} FROM ${table} WHERE ${whereConditionString}`
-			}
-		} else {
-			return {
-				text: `SELECT ${queryString} FROM ${table}`
-			}
+
+	const whereConditionArray = selectors.map(selector => {
+		const column = camelToSnake(selector.selector)
+		const condition = selector.condition ? selector.condition : '='
+		const value = selector.value
+		return `${column} ${condition} '${value}'`
+	})
+	const joinCondition = joinType == 'or' ? ' OR ' : ' AND '
+	const whereConditionString = whereConditionArray.join(joinCondition)
+
+	if (selectors.length) {
+		return {
+			text: `SELECT ${queryString} FROM ${table} WHERE ${whereConditionString}`
+		}
+	} else {
+		return {
+			text: `SELECT ${queryString} FROM ${table}`
 		}
 	}
+}
+
 
 module.exports.createOffsetSelectQuery = (selectColumns, table, selector, selectorValue, limit, offset) => {
+	selectColumns = selectColumns.map(column => camelToSnake(column))
 	const queryString = selectColumns.join(', ')
 
   if (selector) {
@@ -59,10 +64,12 @@ module.exports.createInsertQuery = (inputObject, table, returnValues) => {
     (key, index) => `$${index + 1}`
   ).join(', ')
 
-
   if(returnValues) {
+    const returnString = Array.isArray(returnValues)
+			? returnValues.map(returnVal => camelToSnake(returnVal)).join(', ')
+			: returnValues
     return {
-      text: `INSERT INTO ${table} (${queryString}) VALUES (${queryValuesString}) RETURNING *`,
+      text: `INSERT INTO ${table} (${queryString}) VALUES (${queryValuesString}) RETURNING ${returnString}`,
       values: queryValues
     }
   } else {
