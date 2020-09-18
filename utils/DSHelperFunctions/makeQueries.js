@@ -1,3 +1,9 @@
+const camelToSnake = string => (
+	string.replace(/([A-Z])/g, letter => (
+			'_' + letter.toLowerCase()
+	))
+)
+
 module.exports.createSelectQuery = (selectColumns, table, selector, selectorValue) => {
   const queryString = selectColumns.join(', ')
 
@@ -11,6 +17,24 @@ module.exports.createSelectQuery = (selectColumns, table, selector, selectorValu
     }
   }
 }
+
+module.exports.createSelectAndQuery = (selectColumns, table, selectors, selectorValues, conditions) => {
+	const queryString = selectColumns.join(', ')
+	const whereConditionArray = selectors.map( (selector, index) => (
+		`${camelToSnake(selector)} ${conditions ? conditions[index] : '=' } '${selectorValues[index]}'`
+		))
+		const whereConditionString = whereConditionArray.join(' AND ')
+		
+		if (selectors.length) {
+			return {
+				text: `SELECT ${queryString} FROM ${table} WHERE ${whereConditionString}`
+			}
+		} else {
+			return {
+				text: `SELECT ${queryString} FROM ${table}`
+			}
+		}
+	}
 
 module.exports.createOffsetSelectQuery = (selectColumns, table, selector, selectorValue, limit, offset) => {
 	const queryString = selectColumns.join(', ')
@@ -26,23 +50,7 @@ module.exports.createOffsetSelectQuery = (selectColumns, table, selector, select
   }
 }
 
-module.exports.createSelectAndQuery = (selectColumns, table, selectors, selectorValues) => {
-	const queryString = selectColumns.join(', ')
-	const whereConditionArray = selectors.map( (selector, index) => `${selector} = ${selectorValues[index]}`)
-	const whereConditionString = whereConditionArray.join(' AND ')
-
-	return {
-		text: `SELECT ${queryString} FROM ${table} WHERE ${whereConditionString}`
-	}
-}
-
 module.exports.createInsertQuery = (inputObject, table, returnValues) => {
-	const camelToSnake = string => (
-    string.replace(/([A-Z])/g, letter => (
-        '_' + letter.toLowerCase()
-    ))
-	)
-
 	const queryKeys = Object.keys(inputObject)
   const queryValues = Object.values(inputObject)
 	const convertedQueryKeys = queryKeys.map(key => camelToSnake(key))
@@ -59,7 +67,7 @@ module.exports.createInsertQuery = (inputObject, table, returnValues) => {
     }
   } else {
     return {
-      text: `INSERT INTO ${table} (${queryString}) VALUES (${queryValuesString}) RETURNING id`,
+      text: `INSERT INTO ${table} (${queryString}) VALUES (${queryValuesString})`,
       values: queryValues
     }
   }
