@@ -5,12 +5,7 @@ module.exports = {
 		},
 
 		async login(parent, { input }, { dataSources, req, app, postgres }) {
-			const loginMessage = await dataSources.usersDB.login(input)
-			const	loginUser = await dataSources.usersDB.getUserFromId(loginMessage.user_id)
-			return {
-				...loginMessage,
-				user: loginUser,
-			}
+			return await dataSources.usersDB.login(input)
 		},
 
 		async logout(parent, { input }, { dataSources, req, app, postgres }) {
@@ -25,6 +20,10 @@ module.exports = {
 	Query: {
 		async getLoggedUser(parent, { input }, { dataSources, req, app, postgres }) {
 			return await dataSources.usersDB.getLoggedUser(input)
-		}
+		},
+
+		async getUserFromId(parent, { id }, { dataSources, req, app, postgres }) {
+			return await dataSources.usersDB.getUserFromId(id)
+		},
 	}
 }

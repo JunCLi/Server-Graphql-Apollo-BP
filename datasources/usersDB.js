@@ -1,9 +1,10 @@
 const { DataSource } = require('apollo-datasource')
 
 const authenticate = require('../utils/authentication/authenticate')
-const { encryptPassword, comparePassword } = require('../utils/DSHelperFunctions/bcryptFunctions')
 const { createCookie, setCookie, retrieveCookie } = require('../utils/authentication/cookieFunctions')
+const { encryptPassword, comparePassword } = require('../utils/DSHelperFunctions/bcryptFunctions')
 const { createInsertQuery, createUpdateQuery, createSelectQuery } = require('../utils/DSHelperFunctions/makeQueries')
+const { snakeToCamel } = require('../utils/helperFuncitons/caseConv')
 
 const databaseSchema = 'boilerplate'
 const usersTable = `${databaseSchema}.users`
@@ -18,6 +19,23 @@ class UsersDB extends DataSource {
 		this.context = config.context
 	}
 
+	async generateId (email) {
+		const emailComposite = (await encryptPassword(email)).replace('$2b$12$', '').substring(0, 12)
+		const dateComposite = (await encryptPassword(`${Math.floor(Date.now() / 1000)}`)).replace('$2b$12$', '').substring(0, 12)
+		return emailComposite + dateComposite	
+	}
+
+	async uniqueIDGenerator(email) {
+		const id = await this.generateId(email)
+
+		const checkIdColumns = ['id']
+		const checkDuplicateIdQuery = createSelectQuery(checkIdColumns, usersTable, 'id', id)
+		const checkDuplicateIdResult = await this.context.postgres.query(checkDuplicateIdQuery)
+		if (checkDuplicateIdResult.rows.length) this.uniqueIDGenerator(email)
+
+		return id
+	}
+
 	async signup(input) {
 		try {
 			let { email, password } = input
@@ -28,12 +46,15 @@ class UsersDB extends DataSource {
 			]
 			const checkDuplicateEmailQuery = createSelectQuery(checkDuplicateEmailColumns, usersTable, 'email', email)
 			const checkDuplicateEmailResult = await this.context.postgres.query(checkDuplicateEmailQuery)
-
 			if (checkDuplicateEmailResult.rows.length) throw 'A user with this email already exists.'
 
+			
+			const id = await this.uniqueIDGenerator(email)
+			console.log(id)
 			const hashedPassword = await encryptPassword(password)
 			const insertUserObject = {
 				...input,
+				id: id,
 				password: hashedPassword,
 				email: email,
 			}
@@ -50,31 +71,37 @@ class UsersDB extends DataSource {
 		try {
 			let { email, password } = input
 			email = email.toLowerCase()
+			console.log('test')
 
 			const getUserColumns = [
 				'id',
 				'email',
-				'first_name',
-				'last_name',
+				'firstName',
+				'lastName',
 				'password',
 			]
 			const getUserQuery = createSelectQuery(getUserColumns, usersTable, 'email', email)
-			const getUserResult = await this.context.postgres.query(getUserQuery)
+			const getUserResult = snakeToCamel(await this.context.postgres.query(getUserQuery))
 			if (!getUserResult.rows.length) throw "A user with this email doesn't exist"
 
-			const { id: user_id, password: dbPassword } = getUserResult.rows[0]
+			const { id: userId, password: dbPassword, firstName, lastName } = getUserResult.rows[0]
 			if (!await comparePassword(password, dbPassword)) throw 'Incorrect password'
 
 			const tokenData = {
-				user_id: user_id
+				userId: userId
 			}
 			const myJWTToken = await createCookie(tokenData)
 			setCookie(myJWTToken, this.context.req.res)
 
 			return {
 				message: 'success',
-				user_id: user_id,
 				token: myJWTToken,
+				user: {
+					email: email,
+					userId: userId,
+					firstName: firstName,
+					lastName: lastName,
+				}
 			}
 		} catch(err) {
 			throw err
@@ -85,10 +112,10 @@ class UsersDB extends DataSource {
 		try {
 			const jwtCookie = retrieveCookie(this.context.req)
 			const { token, exp, iat } = jwtCookie
-			const { user_id } = jwtCookie.data
+			const { userId } = jwtCookie.data
 
 			const blacklistJWTObject = {
-				user_id: user_id,
+				userId: userId,
 				token: token,
 				tokenIssued: iat,
 				tokenExpiration: exp
@@ -106,27 +133,38 @@ class UsersDB extends DataSource {
 	async getLoggedUser(input) {
 		try {
 			const tokenData = await authenticate(this.context.req, blacklistTable, this.context.postgres)
-			const { user_id } = tokenData
+			const { userId } = tokenData
 
-			return await this.getUserFromId(user_id)
+			const user = await this.getUserFromId(userId)
+
+			return {
+				userId,
+				...user,
+			}
+
 		} catch(err) {
 			throw err
 		}
 	}
 
-	async getUserFromId(user_id) {
+	async getUserFromId(userId) {
 		try {
+			console.log('userId:', userId)
 			const getUserColumns = [
 				'email',
-				'first_name',
-				'last_name',
+				'firstName',
+				'lastName',
+				'dateCreated',
+				'lastModified',
 			]
-			const getUserQuery = createSelectQuery(getUserColumns, usersTable, 'id', user_id)
-			const getUserResult = await this.context.postgres.query(getUserQuery)
+			const getUserQuery = createSelectQuery(getUserColumns, usersTable, 'id', userId)
+			const getUserResult = snakeToCamel(await this.context.postgres.query(getUserQuery))
+
+			if (!getUserResult.rows.length) throw 'A user with this ID does not exist'
 
 			return { 
 				...getUserResult.rows[0],
-				user_id: user_id,
+				userId: userId,
 			}
 		} catch(err) {
 			throw err

@@ -1,19 +1,20 @@
 const { gql } = require('apollo-server-express')
 
 module.exports = gql`
-	type QueryPlaceholder {
-		id: ID
-	}
+	scalar Date
 
 	extend type Query {
 		getLoggedUser: User
+		getUserFromId(id: ID!): User
 	}
 
 	type User {
-		user_id: ID!
+		userId: ID!
 		email: String
-		first_name: String
-		last_name: String
+		dateCreated: Date!
+		lastModified: Date!
+		firstName: String
+		lastName: String
 	}
 
 	extend type Mutation {
@@ -26,8 +27,8 @@ module.exports = gql`
 	input SignupObject {
 		email: String!
 		password: String!
-		firstName: String!
-		lastName: String!
+		firstName: String
+		lastName: String
 	}
 
 	input LoginObject {
@@ -42,7 +43,6 @@ module.exports = gql`
 	type LoginResponse {
 		message: String!
 		token: String!
-		user_id: ID!
 		user: User!
 	}
 `

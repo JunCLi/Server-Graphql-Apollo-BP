@@ -4,10 +4,10 @@ exports.up = pgm => {
 	//1. Users Table
   pgm.sql(`
     CREATE TABLE "${databaseSchema}"."users" (
-      "id" SERIAL PRIMARY KEY,
+      "id" VARCHAR(255) PRIMARY KEY,
       "email" VARCHAR(255) NOT NULL,
       "password" VARCHAR(255) NOT NULL,
-			"user_date_created" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			"date_created" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			"last_modified" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			"first_name" VARCHAR(128),
 			"last_name" VARCHAR(128)
