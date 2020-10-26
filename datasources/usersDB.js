@@ -149,7 +149,6 @@ class UsersDB extends DataSource {
 
 	async getUserFromId(userId) {
 		try {
-			console.log('userId:', userId)
 			const getUserColumns = [
 				'email',
 				'firstName',
@@ -160,7 +159,7 @@ class UsersDB extends DataSource {
 			const getUserQuery = createSelectQuery(getUserColumns, usersTable, 'id', userId)
 			const getUserResult = snakeToCamel(await this.context.postgres.query(getUserQuery))
 
-			if (!getUserResult.rows.length) throw 'A user with this ID does not exist'
+			if (!getUserResult.rows.length) throw 'An user with this ID does not exist'
 
 			return { 
 				...getUserResult.rows[0],

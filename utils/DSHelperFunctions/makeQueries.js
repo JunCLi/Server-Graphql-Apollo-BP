@@ -1,12 +1,34 @@
 const { camelToSnake, snakeToCamel } = require('../helperFuncitons/caseConv')
 
+const createWhereCondition = (selectors, joinType) => {
+	return Object.keys(selectors).map((selector, index) => {
+		const column = camelToSnake(selector)
+		let joinType = index === 0 ? '' : 'AND '
+		let condition = '='
+		let value = selectors[selector]
+
+		if (typeof value === 'object'
+			&& value !== null
+			&& !Array.isArray(value)
+			&& !(value instanceof Date)
+		) {
+			joinType = index === 0 ? '' : value.joinType + ' '
+			condition = value.condition
+			value = value.value
+		}
+		return `${joinType}${column} ${condition} '${value}'`
+	}).join(' ')
+}
+
 module.exports.createSelectQuery = (selectColumns, table, selector, selectorValue) => {
 	selectColumns = selectColumns.map(column => camelToSnake(column))
   const queryString = selectColumns.join(', ')
+	
+	const snakeSelector = camelToSnake(selector)
 
   if (selector) {
     return {
-      text: `SELECT ${queryString} FROM ${table} WHERE ${selector} = '${selectorValue}'`
+      text: `SELECT ${queryString} FROM ${table} WHERE ${snakeSelector} = '${selectorValue}'`
     }
   } else {
     return {
@@ -80,23 +102,27 @@ module.exports.createInsertQuery = (inputObject, table, returnValues) => {
   }
 }
 
-module.exports.createUpdateQuery = (inputObject, table, selector, optSelectorValue) => {  
-  const queryKeys = Object.keys(inputObject).filter(
-    key => inputObject[key] !== null && key !== selector
-  )
+module.exports.createUpdateQuery = (inputObject, table, selectors, returnVal) => {  
+  const queryKeys = Object.keys(inputObject).filter(key => (
+		Object.keys(selectors).filter(selector => (
+			inputObject[key] !== null && key !== selector
+		))
+	))
+
   const queryValues = queryKeys.map(key => inputObject[key])
   const queryString = queryKeys.map((key, index) => {
     return `${key} = $${index + 1}`
-  }).join(', ')
+	}).join(', ')
+	const whereConditionString = createWhereCondition(selectors)
 
-  if (optSelectorValue) {
+  if (returnVal) {
     return {
-      text: `UPDATE ${table} SET ${queryString} WHERE ${selector} = '${optSelectorValue}' RETURNING id`,
+      text: `UPDATE ${table} SET ${queryString} WHERE ${whereConditionString} RETURNING ${returnVal}`,
       values: queryValues
     }
   } else {
     return {
-      text: `UPDATE ${table} SET ${queryString} WHERE ${selector} = '${inputObject[selector]}' RETURNING id`,
+      text: `UPDATE ${table} SET ${queryString} WHERE ${whereConditionString} RETURNING id`,
       values: queryValues
     }
   }
