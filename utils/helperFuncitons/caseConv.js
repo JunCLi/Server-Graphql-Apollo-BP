@@ -20,8 +20,6 @@ const snakeToCamel = object => {
 		return newObject
 	} else if (Array.isArray(object)) {
 		return object.map(item => snakeToCamel(item))
-	} else if (typeof object === 'string') {
-		return toCamel(object)
 	}
 
 	return object
@@ -50,13 +48,12 @@ const camelToSnake = object => {
 		return newObject
 	} else if (Array.isArray(object)) {
 		return object.map(item => camelToSnake(item))
-	} else if (typeof object === 'string') {
-		return toSnake(object)
 	}
 
 	return object
 }
 
-
+module.exports.toSnake = toSnake
+module.exports.toCamel = toCamel
 module.exports.snakeToCamel = snakeToCamel
 module.exports.camelToSnake = camelToSnake

@@ -1,8 +1,8 @@
-const { camelToSnake, snakeToCamel } = require('../helperFuncitons/caseConv')
+const { toSnake } = require('../helperFuncitons/caseConv')
 
 const createWhereCondition = (selectors, joinType) => {
 	return Object.keys(selectors).map((selector, index) => {
-		const column = camelToSnake(selector)
+		const column = toSnake(selector)
 		let joinType = index === 0 ? '' : 'AND '
 		let condition = '='
 		let value = selectors[selector]
@@ -21,10 +21,10 @@ const createWhereCondition = (selectors, joinType) => {
 }
 
 module.exports.createSelectQuery = (selectColumns, table, selector, selectorValue) => {
-	selectColumns = selectColumns.map(column => camelToSnake(column))
+	selectColumns = selectColumns.map(column => toSnake(column))
   const queryString = selectColumns.join(', ')
 	
-	const snakeSelector = camelToSnake(selector)
+	const snakeSelector = toSnake(selector)
 
   if (selector) {
     return {
@@ -38,11 +38,11 @@ module.exports.createSelectQuery = (selectColumns, table, selector, selectorValu
 }
 
 module.exports.createMultiSelectQuery = (selectColumns, table, selectors, joinType) => {
-	selectColumns = selectColumns.map(column => camelToSnake(column))
+	selectColumns = selectColumns.map(column => toSnake(column))
 	const queryString = selectColumns.join(', ')
 
 	const whereConditionArray = selectors.map(selector => {
-		const column = camelToSnake(selector.selector)
+		const column = toSnake(selector.selector)
 		const condition = selector.condition ? selector.condition : '='
 		const value = selector.value
 		return `${column} ${condition} '${value}'`
@@ -63,7 +63,7 @@ module.exports.createMultiSelectQuery = (selectColumns, table, selectors, joinTy
 
 
 module.exports.createOffsetSelectQuery = (selectColumns, table, selector, selectorValue, limit, offset) => {
-	selectColumns = selectColumns.map(column => camelToSnake(column))
+	selectColumns = selectColumns.map(column => toSnake(column))
 	const queryString = selectColumns.join(', ')
 
   if (selector) {
@@ -80,7 +80,7 @@ module.exports.createOffsetSelectQuery = (selectColumns, table, selector, select
 module.exports.createInsertQuery = (inputObject, table, returnValues) => {
 	const queryKeys = Object.keys(inputObject)
   const queryValues = Object.values(inputObject)
-	const convertedQueryKeys = queryKeys.map(key => camelToSnake(key))
+	const convertedQueryKeys = queryKeys.map(key => toSnake(key))
   const queryString = convertedQueryKeys.join(', ')
   const queryValuesString = queryKeys.map(
     (key, index) => `$${index + 1}`
@@ -88,7 +88,7 @@ module.exports.createInsertQuery = (inputObject, table, returnValues) => {
 
   if(returnValues) {
     const returnString = Array.isArray(returnValues)
-			? returnValues.map(returnVal => camelToSnake(returnVal)).join(', ')
+			? returnValues.map(returnVal => toSnake(returnVal)).join(', ')
 			: returnValues
     return {
       text: `INSERT INTO ${table} (${queryString}) VALUES (${queryValuesString}) RETURNING ${returnString}`,
@@ -111,7 +111,7 @@ module.exports.createUpdateQuery = (inputObject, table, selectors, returnVal) =>
 
   const queryValues = queryKeys.map(key => inputObject[key])
   const queryString = queryKeys.map((key, index) => {
-    return `${key} = $${index + 1}`
+    return `${toSnake(key)} = $${index + 1}`
 	}).join(', ')
 	const whereConditionString = createWhereCondition(selectors)
 
