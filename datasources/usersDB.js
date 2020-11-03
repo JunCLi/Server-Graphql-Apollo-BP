@@ -19,23 +19,6 @@ class UsersDB extends DataSource {
 		this.context = config.context
 	}
 
-	async generateId (email) {
-		const emailComposite = (await encryptPassword(email)).replace('$2b$12$', '').substring(0, 12)
-		const dateComposite = (await encryptPassword(`${Math.floor(Date.now() / 1000)}`)).replace('$2b$12$', '').substring(0, 12)
-		return emailComposite + dateComposite	
-	}
-
-	async uniqueIDGenerator(email) {
-		const id = await this.generateId(email)
-
-		const checkIdColumns = ['id']
-		const checkDuplicateIdQuery = createSelectQuery(checkIdColumns, usersTable, 'id', id)
-		const checkDuplicateIdResult = await this.context.postgres.query(checkDuplicateIdQuery)
-		if (checkDuplicateIdResult.rows.length) this.uniqueIDGenerator(email)
-
-		return id
-	}
-
 	async signup(input) {
 		try {
 			let { email, password } = input
@@ -48,9 +31,7 @@ class UsersDB extends DataSource {
 			const checkDuplicateEmailResult = await this.context.postgres.query(checkDuplicateEmailQuery)
 			if (checkDuplicateEmailResult.rows.length) throw 'A user with this email already exists.'
 
-			
-			const id = await this.uniqueIDGenerator(email)
-			console.log(id)
+			const id = await this.context.dataSources.DBFunctions.uniqueIDGenerator('id', usersTable, 24)
 			const hashedPassword = await encryptPassword(password)
 			const insertUserObject = {
 				...input,
