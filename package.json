@@ -1,5 +1,11 @@
 {
   "scripts": {
+		"db:export": "yarn db:export:schema && yarn db:export:data",
+		"db:export:schema": "pg_dump -U postgres -s -n boilerplate -f ./migrations/postgres_boilerplate_schema.sql postgres",
+		"db:export:data": "pg_dump -U postgres -a -n boilerplate -f ./migrations/postgres_boilerplate_data.sql postgres",
+		"db:import": "yarn db:import:schema && yarn db:import:data",
+		"db:import:schema": "psql -d postgres -f ./migrations/postgres_boilerplate_schema.sql -U postgres",
+		"db:import:data": "psql -d postgres -f ./migrations/postgres_boilerplate_data.sql -U postgres",
     "db:up": "yarn node-pg-migrate up --create-schema",
     "db:drop": "psql -U postgres -d postgres -c \"DROP SCHEMA IF EXISTS \\\"boilerplate\\\"CASCADE\"",
     "db:reset": "yarn db:drop && yarn db:up",
